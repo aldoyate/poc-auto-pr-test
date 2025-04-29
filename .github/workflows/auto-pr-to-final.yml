@@ -25,19 +25,54 @@ jobs:
       - name: Log - Checkout completo
         run: echo "Repositorio clonado correctamente"
 
+      - name: Verificar si hay cambios reales antes de crear PR
+        run: |
+          echo "Comparando ramas origin/ms-documents-bs-final y origin/ms-documents-bs..."
+          git fetch origin ms-documents-bs-final
+          git fetch origin ms-documents-bs
+          git diff --name-status origin/ms-documents-bs-final..origin/ms-documents-bs > diff.txt
+          cat diff.txt
+          if [ -s diff.txt ]; then
+            echo "Se detectaron cambios, se continuará con la creación del PR."
+          else
+            echo "No se detectaron cambios. Se cancela la creación del PR."
+            exit 1
+          fi
+
+      - name: Eliminar diff.txt
+        run: rm -f diff.txt
+
       - name: Crear PR a ms-documents-bs-final
+        id: cpr
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           commit-message: "Commit automático de cambios detectados en ms-documents-bs"
           branch: auto-promote/ms-documents-bs
           base: ms-documents-bs-final
           title: "PR automático desde ms-documents-bs"
-          body: "Este PR fue generado automáticamente para promover cambios."
-          add-paths: |
-            *
+          body: |
+            Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
           branch-suffix: timestamp
           delete-branch: true
+          committer: GitHub <noreply@github.com>
+          author: aldoyate <aldoyate@users.noreply.github.com>
+          draft: false
+
+      - name: Fusionar automáticamente el PR recién creado
+        if: steps.cpr.outputs.pull-request-number != ''
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prNumber = parseInt('${{ steps.cpr.outputs.pull-request-number }}');
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              merge_method: 'squash'
+            });
+            console.log(`PR #${prNumber} fusionado automáticamente.`);
 
       - name: Log - PR Creation Step Completed
-        run: echo "Paso de creación de PR automático ejecutado. Verificando resultados..."
+        run: echo "Paso de creación y fusión de PR automático ejecutado correctamente."
