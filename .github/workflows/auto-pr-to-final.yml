@@ -9,7 +9,7 @@ on:
 
 jobs:
   crear-pr-automatico:
-    if: github.head_ref == 'ms-documents-bs'
+    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'ms-documents-bs' || github.head_ref == 'main'
     runs-on: ubuntu-latest
 
     steps:
