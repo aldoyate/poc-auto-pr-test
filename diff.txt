@@ -2,6 +2,7 @@ M	.github/workflows/auto-pr-to-final.yml
 A	archivo-prueba-1745899365.txt
 M	archivo1.txt
 A	cambio-garantizado-1745902758.txt
+D	diff.txt
 A	dummy-change-1745904770.txt
 A	test-1745900854.txt
 A	test-1745901730.txt
@@ -18,3 +19,6 @@ A	test-1745906658.txt
 A	test-1745907507.txt
 A	test-1745907635.txt
 A	test-1745907746.txt
+A	test-1745908199.txt
+A	test-1745909760.txt
+A	test-1745910140.txt
