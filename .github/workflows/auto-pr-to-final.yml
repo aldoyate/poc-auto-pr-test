@@ -21,16 +21,19 @@ jobs:
 
       - name: Verificar si hay cambios reales antes de crear PR
         run: |
-          git fetch origin ms-documents-bs-final
-          if git diff --quiet origin/ms-documents-bs-final; then
-            echo "No hay cambios. Terminando workflow."
-            exit 0
+          git fetch origin ms-documents-bs ms-documents-bs-final
+          echo "Comparando HEAD de ms-documents-bs con ms-documents-bs-final..."
+          if git diff --quiet origin/ms-documents-bs-final origin/ms-documents-bs; then
+            echo "cambios=false" >> $GITHUB_OUTPUT
+            echo "No hay cambios detectados. Finalizando workflow."
           else
-            echo "Se detectaron cambios. Continuando."
+            echo "cambios=true" >> $GITHUB_OUTPUT
+            echo "Cambios detectados. Continuando con la creación del PR."
           fi
 
       - name: Crear PR automático
         id: cpr
+        if: steps.verificacion.outputs.cambios == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
