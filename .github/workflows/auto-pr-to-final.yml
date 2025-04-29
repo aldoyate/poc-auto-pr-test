@@ -41,7 +41,6 @@ jobs:
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
           draft: false
           delete-branch: false # No creamos branches intermedios
-          branch-suffix: none  # No agregamos timestamp
 
       - name: Fusionar PR automáticamente si se creó
         if: steps.cpr.outputs.pull-request-number != ''
