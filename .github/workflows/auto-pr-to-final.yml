@@ -51,8 +51,8 @@ jobs:
           body: |
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
           add-paths: |
-           !diff.txt
-           **
+            !diff.txt
+            **
           branch-suffix: timestamp
           delete-branch: true
           committer: GitHub <noreply@github.com>
