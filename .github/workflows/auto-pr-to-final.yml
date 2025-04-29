@@ -31,15 +31,6 @@ jobs:
             echo "Cambios detectados. Continuando con la creación del PR."
           fi
 
-      - name: Forzar commit si hay cambios
-        if: env.CAMBIOS == 'true'
-        run: |
-          git config --global user.name "GitHub"
-          git config --global user.email "noreply@github.com"
-          git checkout -b auto-promote/ms-documents-bs
-          git merge origin/ms-documents-bs-final --no-commit --no-ff || true
-          git commit -am "Forzando commit para crear PR automático" || echo "Nada que commitear"
-
       - name: Crear PR automático
         id: cpr
         if: env.CAMBIOS == 'true'
