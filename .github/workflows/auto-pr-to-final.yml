@@ -27,4 +27,6 @@ jobs:
           base: ms-documents-bs-final
           title: "PR automático desde ms-documents-bs"
           body: "Este PR fue generado automáticamente para promover cambios."
+          add-paths: |
+            *
 
