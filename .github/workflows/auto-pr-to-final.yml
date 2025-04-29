@@ -1,15 +1,15 @@
-name: Auto PR de Branch 1 a Branch 2
+name: Auto PR de ms-documents-bs a ms-documents-bs-final
 
 on:
   pull_request:
     types: [opened]
     branches:
-      - ms-documents-bs
+      - main
   workflow_dispatch:
 
 jobs:
   crear-pr-automatico:
-    if: github.event_name == 'workflow_dispatch' || github.head_ref == 'ms-documents-bs' || github.head_ref == 'main'
+    if: github.event.pull_request.head.ref == 'ms-documents-bs'
     runs-on: ubuntu-latest
 
     steps:
