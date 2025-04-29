@@ -46,7 +46,6 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: aldoyate <aldoyate@users.noreply.github.com>
           signoff: false
-          rebase: false
 
       - name: Fusionar PR automáticamente si se creó
         if: steps.cpr.outputs.pull-request-number != ''
