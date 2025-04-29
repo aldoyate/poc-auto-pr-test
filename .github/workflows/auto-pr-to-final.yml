@@ -5,6 +5,7 @@ on:
     types: [opened]
     branches:
       - ms-documents-bs
+  workflow_dispatch:
 
 jobs:
   crear-pr-automatico:
