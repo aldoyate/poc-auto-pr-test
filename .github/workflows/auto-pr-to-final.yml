@@ -18,6 +18,9 @@ jobs:
         with:
           fetch-depth: 0
 
+      - name: Log - Checkout completo
+        run: echo "Repositorio clonado correctamente"
+
       - name: Crear PR a ms-documents-bs-final
         uses: peter-evans/create-pull-request@v5
         with:
@@ -31,3 +34,5 @@ jobs:
             *
           branch-suffix: timestamp
           delete-branch: true
+      - name: Log - PR Creation Step Completed
+    run: echo "Paso de creación de PR automático ejecutado. Verificando resultados..."
