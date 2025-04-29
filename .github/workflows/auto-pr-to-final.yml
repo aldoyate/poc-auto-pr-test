@@ -31,28 +31,21 @@ jobs:
             echo "Cambios detectados. Continuando con la creación del PR."
           fi
 
-      - name: Agregar dummy commit si hay cambios
+      - name: Crear PR automático real
         if: env.CAMBIOS == 'true'
-        run: |
-          git config user.name "GitHub"
-          git config user.email "noreply@github.com"
-          git commit --allow-empty -m "chore: dummy commit para forzar PR"
-
-      - name: Crear PR automático
-        if: env.CAMBIOS == 'true'
-        uses: peter-evans/create-pull-request@v5.0.2
+        uses: actions/github-script@v6
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          base: ms-documents-bs-final
-          branch: auto-promote/ms-documents-bs-${{ github.run_id }}
-          title: "PR automático desde ms-documents-bs"
-          body: |
-            Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
-          draft: false
-          delete-branch: true
-          commit-message: "[create-pull-request] automated change"
-          committer: GitHub <noreply@github.com>
-          author: aldoyate <aldoyate@users.noreply.github.com>
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: "ms-documents-bs", // rama de donde salen los cambios
+              base: "ms-documents-bs-final", // rama destino
+              title: "PR automático desde ms-documents-bs",
+              body: "Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.",
+              draft: false
+            });
 
       - name: Log - Proceso completado
         run: echo "Workflow completado exitosamente."
