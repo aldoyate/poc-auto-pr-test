@@ -21,8 +21,9 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          source: ${{ github.head_ref }}
-          destination: ms-documents-bs-final
-          title: 'PR automático generado desde ${{ github.head_ref }}'
-          body: 'Este PR fue generado automáticamente desde ms-documents-bs.'
+          commit-message: "Promoción automática desde ms-documents-bs"
+          branch: auto-promote/ms-documents-bs
+          base: ms-documents-bs-final
+          title: "PR automático desde ms-documents-bs"
+          body: "Este PR fue generado automáticamente para promover cambios."
 
