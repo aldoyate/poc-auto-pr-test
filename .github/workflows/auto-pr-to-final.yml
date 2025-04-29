@@ -22,13 +22,12 @@ jobs:
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
-          commit-message: "Promoción automática desde ms-documents-bs"
+          commit-message: "Commit automático de cambios detectados en ms-documents-bs"
           branch: auto-promote/ms-documents-bs
           base: ms-documents-bs-final
           title: "PR automático desde ms-documents-bs"
           body: "Este PR fue generado automáticamente para promover cambios."
           add-paths: |
             *
-          commit-message: "Commit automático de cambios detectados en ms-documents-bs"
           branch-suffix: timestamp
           delete-branch: true
