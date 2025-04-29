@@ -29,4 +29,6 @@ jobs:
           body: "Este PR fue generado automáticamente para promover cambios."
           add-paths: |
             *
-
+          commit-message: "Commit automático de cambios detectados en ms-documents-bs"
+          branch-suffix: timestamp
+          delete-branch: true
