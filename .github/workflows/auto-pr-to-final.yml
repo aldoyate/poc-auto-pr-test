@@ -50,7 +50,9 @@ jobs:
           title: "PR automático desde ms-documents-bs"
           body: |
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
-          add-paths: '*'
+          add-paths: |
+           !diff.txt
+           **
           branch-suffix: timestamp
           delete-branch: true
           committer: GitHub <noreply@github.com>
