@@ -20,7 +20,7 @@ jobs:
           ref: ${{ github.head_ref }}
 
       - name: Log - Branch actual
-        run: 'echo "Branch actual: ${{ github.head_ref }}"'
+        run: echo "Branch actual: ${{ github.head_ref }}"
 
       - name: Log - Checkout completo
         run: echo "Repositorio clonado correctamente"
@@ -61,9 +61,9 @@ jobs:
         if: steps.cpr.outputs.pull-request-number != ''
         uses: peter-evans/enable-pull-request-automerge@v2
         with:
-            token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-            pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
-            merge-method: squash
+          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+          merge-method: squash
 
       - name: Log - PR Creation Step Completed
         run: echo "Paso de creación y fusión de PR automático ejecutado correctamente."
