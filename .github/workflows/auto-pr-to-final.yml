@@ -42,6 +42,11 @@ jobs:
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
           draft: false
           delete-branch: true # No creamos branches intermedios
+          commit-message: "[create-pull-request] automated change"
+          committer: GitHub <noreply@github.com>
+          author: aldoyate <aldoyate@users.noreply.github.com>
+          signoff: false
+          rebase: false
 
       - name: Fusionar PR automáticamente si se creó
         if: steps.cpr.outputs.pull-request-number != ''
