@@ -17,6 +17,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
+          ref: ${{ github.head_ref }}
+
+      - name: Log - Branch actual
+        run: 'echo "Branch actual: ${{ github.head_ref }}"'
 
       - name: Log - Checkout completo
         run: echo "Repositorio clonado correctamente"
