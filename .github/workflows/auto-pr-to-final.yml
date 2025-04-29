@@ -22,7 +22,7 @@ jobs:
       - name: Verificar si hay cambios reales antes de crear PR
         run: |
           git fetch origin ms-documents-bs ms-documents-bs-final
-          echo "Comparando HEAD de ms-documents-bs con ms-documents-bs-final..."
+          echo "Comparando origin/ms-documents-bs con origin/ms-documents-bs-final..."
           if git diff --quiet origin/ms-documents-bs-final origin/ms-documents-bs; then
             echo "CAMBIOS=false" >> $GITHUB_ENV
             echo "No hay cambios detectados. Finalizando workflow."
@@ -31,13 +31,19 @@ jobs:
             echo "Cambios detectados. Continuando con la creación del PR."
           fi
 
-      - name: Log - Valor de CAMBIOS
-        run: 'echo "Valor de CAMBIOS: $CAMBIOS"'
+      - name: Forzar commit si hay cambios
+        if: env.CAMBIOS == 'true'
+        run: |
+          git config --global user.name "GitHub"
+          git config --global user.email "noreply@github.com"
+          git checkout -b auto-promote/ms-documents-bs
+          git merge origin/ms-documents-bs-final --no-commit --no-ff || true
+          git commit -am "Forzando commit para crear PR automático" || echo "Nada que commitear"
 
       - name: Crear PR automático
         id: cpr
         if: env.CAMBIOS == 'true'
-        uses: peter-evans/create-pull-request@v5
+        uses: peter-evans/create-pull-request@v5.0.2
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           base: ms-documents-bs-final
@@ -47,7 +53,7 @@ jobs:
           body: |
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
           draft: false
-          delete-branch: true # No creamos branches intermedios
+          delete-branch: true
           commit-message: "[create-pull-request] automated change"
           committer: GitHub <noreply@github.com>
           author: aldoyate <aldoyate@users.noreply.github.com>
