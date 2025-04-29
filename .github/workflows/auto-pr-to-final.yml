@@ -38,7 +38,8 @@ jobs:
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           base: ms-documents-bs-final
-          branch: auto-promote/ms-documents-bs-${{ github.run_id }}
+          branch: auto-promote/ms-documents-bs
+          branch-suffix: timestamp
           title: "PR automático desde ms-documents-bs"
           body: |
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
@@ -48,7 +49,6 @@ jobs:
           committer: GitHub <noreply@github.com>
           author: aldoyate <aldoyate@users.noreply.github.com>
           signoff: false
-          always-create: true
 
       - name: Fusionar PR automáticamente si se creó
         if: steps.cpr.outputs.pull-request-number != ''
