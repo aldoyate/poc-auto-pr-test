@@ -1,0 +1,50 @@
+name: Crear PRs para ambientes QA, STG y PROD
+
+on:
+  push:
+    branches:
+      - ms-documents-bs-final
+
+jobs:
+  crear-prs-ambientes:
+    name: Crear PRs automáticos hacia QA, STG y PROD
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1. Checkout del repositorio completo (sin profundidad)
+      - name: Checkout repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      # 2. Crear los PRs automáticos hacia cada ambiente
+      - name: Crear PRs automáticos
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const environments = ['qa', 'stg', 'prod'];
+            for (const env of environments) {
+              const prs = await github.rest.pulls.list({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                state: "open",
+                head: `${context.repo.owner}:ms-documents-bs-final`,
+                base: env,
+              });
+
+              if (prs.data.length === 0) {
+                console.log(`Creando PR desde ms-documents-bs-final hacia ${env}...`);
+                await github.rest.pulls.create({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  head: "ms-documents-bs-final",
+                  base: env,
+                  title: `PR automático: Promover cambios a ${env.toUpperCase()}`,
+                  body: `Este PR fue generado automáticamente para promover cambios desde ms-documents-bs-final hacia ${env.toUpperCase()}.`,
+                  draft: false
+                });
+              } else {
+                console.log(`Ya existe un PR abierto hacia ${env}.`);
+              }
+            }
