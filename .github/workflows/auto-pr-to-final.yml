@@ -40,12 +40,40 @@ jobs:
             await github.rest.pulls.create({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              head: "ms-documents-bs", // rama de donde salen los cambios
-              base: "ms-documents-bs-final", // rama destino
+              head: "ms-documents-bs",
+              base: "ms-documents-bs-final",
               title: "PR automático desde ms-documents-bs",
               body: "Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.",
               draft: false
             });
+
+      - name: Fusionar PR automáticamente si se creó
+        if: env.CAMBIOS == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:ms-documents-bs`,
+              base: "ms-documents-bs-final",
+              state: "open"
+            });
+
+            if (prs.data.length > 0) {
+              const prNumber = prs.data[0].number;
+              console.log(`PR #${prNumber} encontrado. Intentando hacer merge...`);
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log(`PR #${prNumber} fusionado automáticamente.`);
+            } else {
+              console.log("No se encontró ningún PR abierto para fusionar.");
+            }
 
       - name: Log - Proceso completado
         run: echo "Workflow completado exitosamente."
