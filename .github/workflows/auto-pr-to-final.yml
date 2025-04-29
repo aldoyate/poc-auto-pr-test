@@ -31,15 +31,20 @@ jobs:
             echo "Cambios detectados. Continuando con la creación del PR."
           fi
 
+      - name: Agregar dummy commit si hay cambios
+        if: env.CAMBIOS == 'true'
+        run: |
+          git config user.name "GitHub"
+          git config user.email "noreply@github.com"
+          git commit --allow-empty -m "chore: dummy commit para forzar PR"
+
       - name: Crear PR automático
-        id: cpr
         if: env.CAMBIOS == 'true'
         uses: peter-evans/create-pull-request@v5.0.2
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           base: ms-documents-bs-final
-          branch: auto-promote/ms-documents-bs
-          branch-suffix: timestamp
+          branch: auto-promote/ms-documents-bs-${{ github.run_id }}
           title: "PR automático desde ms-documents-bs"
           body: |
             Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.
@@ -48,22 +53,6 @@ jobs:
           commit-message: "[create-pull-request] automated change"
           committer: GitHub <noreply@github.com>
           author: aldoyate <aldoyate@users.noreply.github.com>
-          signoff: false
-
-      - name: Fusionar PR automáticamente si se creó
-        if: steps.cpr.outputs.pull-request-number != ''
-        uses: actions/github-script@v6
-        with:
-          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          script: |
-            const prNumber = parseInt('${{ steps.cpr.outputs.pull-request-number }}');
-            await github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber,
-              merge_method: 'squash'
-            });
-            console.log(`PR #${prNumber} fusionado automáticamente.`);
 
       - name: Log - Proceso completado
         run: echo "Workflow completado exitosamente."
