@@ -17,7 +17,7 @@ jobs:
           fetch-depth: 0
 
       - name: Log - Branch actual
-        run: echo "Branch actual: ${{ github.ref }}"
+        run: 'echo "Branch actual: ${{ github.ref }}"'
 
       - name: Verificar si hay cambios reales antes de crear PR
         run: |
