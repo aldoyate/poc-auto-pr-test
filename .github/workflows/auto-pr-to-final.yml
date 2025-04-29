@@ -26,20 +26,17 @@ jobs:
 
       - name: Verificar si hay cambios reales antes de crear PR
         run: |
-          echo "Comparando ramas origin/ms-documents-bs-final y origin/ms-documents-bs..."
+          echo "Comparando commits entre ms-documents-bs-final y ms-documents-bs..."
           git fetch origin ms-documents-bs-final
           git fetch origin ms-documents-bs
-          git diff --name-status origin/ms-documents-bs-final..origin/ms-documents-bs > diff.txt
-          cat diff.txt
-          if [ -s diff.txt ]; then
-            echo "Se detectaron cambios, se continuará con la creación del PR."
+          COMMITS_AHEAD=$(git rev-list --count origin/ms-documents-bs-final..origin/ms-documents-bs)
+          echo "Commits nuevos detectados: $COMMITS_AHEAD"
+          if [ "$COMMITS_AHEAD" -gt 0 ]; then
+            echo "Se detectaron commits nuevos, se continuará con la creación del PR."
           else
-            echo "No se detectaron cambios. Se cancela la creación del PR."
+            echo "No se detectaron commits nuevos. Se cancela la creación del PR."
             exit 1
           fi
-
-      - name: Eliminar diff.txt
-        run: rm -f diff.txt
 
       - name: Crear PR a ms-documents-bs-final
         id: cpr
