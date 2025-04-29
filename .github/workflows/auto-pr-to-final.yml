@@ -24,16 +24,19 @@ jobs:
           git fetch origin ms-documents-bs ms-documents-bs-final
           echo "Comparando HEAD de ms-documents-bs con ms-documents-bs-final..."
           if git diff --quiet origin/ms-documents-bs-final origin/ms-documents-bs; then
-            echo "cambios=false" >> $GITHUB_OUTPUT
+            echo "CAMBIOS=false" >> $GITHUB_ENV
             echo "No hay cambios detectados. Finalizando workflow."
           else
-            echo "cambios=true" >> $GITHUB_OUTPUT
+            echo "CAMBIOS=true" >> $GITHUB_ENV
             echo "Cambios detectados. Continuando con la creación del PR."
           fi
 
+      - name: Log - Valor de CAMBIOS
+        run: 'echo "Valor de CAMBIOS: $CAMBIOS"'
+
       - name: Crear PR automático
         id: cpr
-        if: steps.verificacion.outputs.cambios == 'true'
+        if: env.CAMBIOS == 'true'
         uses: peter-evans/create-pull-request@v5
         with:
           token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
