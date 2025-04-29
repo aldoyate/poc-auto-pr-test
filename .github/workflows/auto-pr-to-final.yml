@@ -1,0 +1,27 @@
+name: Auto PR de Branch 1 a Branch 2
+
+on:
+  pull_request:
+    types: [opened]
+    branches:
+      - ms-documents-bs
+
+jobs:
+  crear-pr-automatico:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Crear PR a ms-documents-bs-final
+        uses: peter-evans/create-pull-request@v5
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          source: ${{ github.head_ref }}
+          destination: ms-documents-bs-final
+          title: 'PR automático generado desde ${{ github.head_ref }}'
+          body: 'Este PR fue generado automáticamente desde ms-documents-bs.'
+
