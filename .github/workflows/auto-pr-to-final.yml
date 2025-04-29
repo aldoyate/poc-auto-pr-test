@@ -9,6 +9,7 @@ on:
 
 jobs:
   crear-pr-automatico:
+    if: github.head_ref == 'ms-documents-bs'
     runs-on: ubuntu-latest
 
     steps:
