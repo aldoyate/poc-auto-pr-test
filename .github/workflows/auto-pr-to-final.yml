@@ -1,10 +1,10 @@
-name: Auto PR de Branch 1 a Branch 2
+name: Auto PR de ms-documents-bs a ms-documents-bs-final
 
 on:
-  pull_request:
-    types: [opened]
+  push:
     branches:
       - ms-documents-bs
+  workflow_dispatch:
 
 jobs:
   crear-pr-automatico:
@@ -16,12 +16,64 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: Crear PR a ms-documents-bs-final
-        uses: peter-evans/create-pull-request@v5
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          source: ${{ github.head_ref }}
-          destination: ms-documents-bs-final
-          title: 'PR automático generado desde ${{ github.head_ref }}'
-          body: 'Este PR fue generado automáticamente desde ms-documents-bs.'
+      - name: Log - Branch actual
+        run: 'echo "Branch actual: ${{ github.ref }}"'
 
+      - name: Verificar si hay cambios reales antes de crear PR
+        run: |
+          git fetch origin ms-documents-bs ms-documents-bs-final
+          echo "Comparando origin/ms-documents-bs con origin/ms-documents-bs-final..."
+          if git diff --quiet origin/ms-documents-bs-final origin/ms-documents-bs; then
+            echo "CAMBIOS=false" >> $GITHUB_ENV
+            echo "No hay cambios detectados. Finalizando workflow."
+          else
+            echo "CAMBIOS=true" >> $GITHUB_ENV
+            echo "Cambios detectados. Continuando con la creación del PR."
+          fi
+
+      - name: Crear PR automático real
+        if: env.CAMBIOS == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            await github.rest.pulls.create({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: "ms-documents-bs",
+              base: "ms-documents-bs-final",
+              title: "PR automático desde ms-documents-bs",
+              body: "Este PR fue generado automáticamente para promover cambios entre ms-documents-bs y ms-documents-bs-final.",
+              draft: false
+            });
+
+      - name: Fusionar PR automáticamente si se creó
+        if: env.CAMBIOS == 'true'
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              head: `${context.repo.owner}:ms-documents-bs`,
+              base: "ms-documents-bs-final",
+              state: "open"
+            });
+
+            if (prs.data.length > 0) {
+              const prNumber = prs.data[0].number;
+              console.log(`PR #${prNumber} encontrado. Intentando hacer merge...`);
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log(`PR #${prNumber} fusionado automáticamente.`);
+            } else {
+              console.log("No se encontró ningún PR abierto para fusionar.");
+            }
+
+      - name: Log - Proceso completado
+        run: echo "Workflow completado exitosamente."
