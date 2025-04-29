@@ -42,7 +42,7 @@ jobs:
       - name: Crear PR a ms-documents-bs-final
         uses: peter-evans/create-pull-request@v5
         with:
-          token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          token: ${{ secrets.GITHUB_TOKEN }}
           commit-message: "Commit automático de cambios detectados en ms-documents-bs"
           branch: auto-promote/ms-documents-bs
           base: ms-documents-bs-final
