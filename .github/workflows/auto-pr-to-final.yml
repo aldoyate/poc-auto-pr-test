@@ -57,19 +57,13 @@ jobs:
           author: aldoyate <aldoyate@users.noreply.github.com>
           draft: false
 
-      - name: Auto Merge PR
+      - name: Habilitar Auto Merge en el PR
         if: steps.cpr.outputs.pull-request-number != ''
-        uses: actions/github-script@v6
+        uses: peter-evans/enable-pull-request-automerge@v2
         with:
-          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
-          script: |
-            const prNumber = parseInt('${{ steps.cpr.outputs.pull-request-number }}');
-            await github.rest.pulls.merge({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
-            console.log(`PR #${prNumber} fusionado automáticamente.`)
+            token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+            pull-request-number: ${{ steps.cpr.outputs.pull-request-number }}
+            merge-method: squash
 
       - name: Log - PR Creation Step Completed
         run: echo "Paso de creación y fusión de PR automático ejecutado correctamente."
