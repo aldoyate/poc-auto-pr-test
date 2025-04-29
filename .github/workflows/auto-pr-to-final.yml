@@ -35,4 +35,4 @@ jobs:
           branch-suffix: timestamp
           delete-branch: true
       - name: Log - PR Creation Step Completed
-    run: echo "Paso de creación de PR automático ejecutado. Verificando resultados..."
+        run: echo "Paso de creación de PR automático ejecutado. Verificando resultados..."
