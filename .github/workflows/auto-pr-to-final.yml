@@ -1,15 +1,14 @@
 name: Auto PR de ms-documents-bs a ms-documents-bs-final
 
 on:
-  pull_request:
-    types: [opened]
+  push:
     branches:
-      - main
+      - ms-documents-bs
   workflow_dispatch:
 
 jobs:
   crear-pr-automatico:
-    if: github.event.pull_request.head.ref == 'ms-documents-bs'
+    if: startsWith(github.ref, 'refs/heads/ms-documents-bs')
     runs-on: ubuntu-latest
 
     steps:
@@ -17,10 +16,10 @@ jobs:
         uses: actions/checkout@v3
         with:
           fetch-depth: 0
-          ref: ${{ github.head_ref }}
+          ref: ${{ github.ref }}
 
       - name: Log - Branch actual
-        run: 'echo "Branch actual: ${{ github.head_ref }}"'
+        run: 'echo "Branch actual: ${{ github.ref }}"'
 
       - name: Log - Checkout completo
         run: echo "Repositorio clonado correctamente"
