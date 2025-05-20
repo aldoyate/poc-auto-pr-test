@@ -1,0 +1,49 @@
+name: Auto PR de ms-documents-bs a ms-documents-bs-final
+
+on:
+  pull_request:
+    branches:
+      - ms-documents-bs-final
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+jobs:
+  auto-merge-bot:
+    if: github.event.pull_request.user.login == 'bot-aldo'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Log - PR desde el bot
+        run: 'echo "El PR fue creado por el bot: ${{ github.event.pull_request.user.login }}"'
+  
+
+      - name: Log - Branch actual
+        run: 'echo "Branch actual: ${{ github.ref }}"'
+
+    
+      - name: Intentar fusionar el PR automáticamente
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            console.log(`Intentando fusionar PR #${prNumber} creado por el bot...`);
+
+            await github.rest.pulls.merge({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              merge_method: 'squash'
+            });
+
+            console.log(`PR #${prNumber} fusionado exitosamente.`);
+
+      - name: Log - Proceso completado
+        run: echo "Workflow completado exitosamente."
