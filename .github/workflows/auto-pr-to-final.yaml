@@ -1,0 +1,62 @@
+name: Auto PR de ms-documents-bs a ms-documents-bs-final
+
+on:
+  pull_request:
+    branches:
+      - ms-documents-bs-final
+    types:
+      - opened
+      - synchronize
+  workflow_dispatch:
+
+concurrency:
+  group: auto-merge-bot-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  auto-merge-bot:
+    if: github.event.pull_request.user.login == 'bot-aldo'
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Log - PR desde el bot
+        run: 'echo "El PR fue creado por el bot: ${{ github.event.pull_request.user.login }}"'
+  
+
+      - name: Log - Branch actual
+        run: 'echo "Branch actual: ${{ github.ref }}"'
+
+      - name: Intentar fusionar el PR automáticamente si es mergeable
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prNumber = context.payload.pull_request.number;
+            console.log(`Verificando PR #${prNumber} creado por el bot...`);
+      
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+      
+            if (pr.mergeable && pr.mergeable_state === 'clean') {
+              console.log(`PR #${prNumber} está listo para merge. Ejecutando fusión...`);
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log(`PR #${prNumber} fusionado exitosamente.`);
+            } else {
+              console.log(`PR #${prNumber} no es mergeable. Estado: ${pr.mergeable_state}. Se omite la fusión.`);
+            }
+              
+      - name: Log - Proceso completado
+        run: echo "Workflow completado exitosamente."
