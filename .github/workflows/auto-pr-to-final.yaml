@@ -31,23 +31,32 @@ jobs:
       - name: Log - Branch actual
         run: 'echo "Branch actual: ${{ github.ref }}"'
 
-    
-      - name: Intentar fusionar el PR automáticamente
+      - name: Intentar fusionar el PR automáticamente si es mergeable
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
             const prNumber = context.payload.pull_request.number;
-            console.log(`Intentando fusionar PR #${prNumber} creado por el bot...`);
-
-            await github.rest.pulls.merge({
+            console.log(`Verificando PR #${prNumber} creado por el bot...`);
+      
+            const { data: pr } = await github.rest.pulls.get({
               owner: context.repo.owner,
               repo: context.repo.repo,
-              pull_number: prNumber,
-              merge_method: 'squash'
+              pull_number: prNumber
             });
-
-            console.log(`PR #${prNumber} fusionado exitosamente.`);
-
+      
+            if (pr.mergeable && pr.mergeable_state === 'clean') {
+              console.log(`PR #${prNumber} está listo para merge. Ejecutando fusión...`);
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log(`PR #${prNumber} fusionado exitosamente.`);
+            } else {
+              console.log(`PR #${prNumber} no es mergeable. Estado: ${pr.mergeable_state}. Se omite la fusión.`);
+            }
+              
       - name: Log - Proceso completado
         run: echo "Workflow completado exitosamente."
