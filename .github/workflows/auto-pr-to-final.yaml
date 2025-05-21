@@ -9,6 +9,10 @@ on:
       - synchronize
   workflow_dispatch:
 
+concurrency:
+  group: auto-merge-bot-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
 jobs:
   auto-merge-bot:
     if: github.event.pull_request.user.login == 'bot-aldo'
