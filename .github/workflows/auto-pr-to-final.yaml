@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: auto-merge-bot
+  group: promote-environments-${{ github.head_ref }}
   cancel-in-progress: false
 
 jobs:
