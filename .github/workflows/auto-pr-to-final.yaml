@@ -38,8 +38,10 @@ jobs:
           script: |
             const prNumber = context.payload.pull_request.number;
             console.log(`Verificando PR #${prNumber} creado por el bot...`);
+
+            await new Promise(resolve => setTimeout(resolve, 5000));
       
-            let retries = 6;
+            let retries = 10;
             let merged = false;
       
             while (retries > 0 && !merged) {
