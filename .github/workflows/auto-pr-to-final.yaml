@@ -31,7 +31,7 @@ jobs:
       - name: Log - Branch actual
         run: 'echo "Branch actual: ${{ github.ref }}"'
 
-      - name: Intentar fusionar el PR automáticamente si es mergeable
+      - name: Intentar fusionar el PR automáticamente
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -39,24 +39,38 @@ jobs:
             const prNumber = context.payload.pull_request.number;
             console.log(`Verificando PR #${prNumber} creado por el bot...`);
       
-            const { data: pr } = await github.rest.pulls.get({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              pull_number: prNumber
-            });
+            let retries = 6;
+            let merged = false;
       
-            if (pr.mergeable && pr.mergeable_state === 'clean') {
-              console.log(`PR #${prNumber} está listo para merge. Ejecutando fusión...`);
-              await github.rest.pulls.merge({
+            while (retries > 0 && !merged) {
+              const { data: pr } = await github.rest.pulls.get({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: prNumber,
-                merge_method: 'squash'
+                pull_number: prNumber
               });
-              console.log(`PR #${prNumber} fusionado exitosamente.`);
-            } else {
-              console.log(`PR #${prNumber} no es mergeable. Estado: ${pr.mergeable_state}. Se omite la fusión.`);
+      
+              console.log(`Intento ${7 - retries} | mergeable=${pr.mergeable}, state=${pr.mergeable_state}`);
+      
+              if (pr.mergeable && pr.mergeable_state === 'clean') {
+                console.log(`PR #${prNumber} está listo para merge. Ejecutando fusión...`);
+                await github.rest.pulls.merge({
+                  owner: context.repo.owner,
+                  repo: context.repo.repo,
+                  pull_number: prNumber,
+                  merge_method: 'squash'
+                });
+                console.log(`PR #${prNumber} fusionado exitosamente.`);
+                merged = true;
+              } else if (pr.mergeable_state === 'unstable') {
+                console.log('PR aún en estado inestable. Esperando 5 segundos antes de reintentar...');
+                await new Promise(resolve => setTimeout(resolve, 5000));
+                retries--;
+              } else {
+                console.log(`PR #${prNumber} no es mergeable. Estado: ${pr.mergeable_state}. Se omite la fusión.`);
+                break;
+              }
             }
-              
-      - name: Log - Proceso completado
-        run: echo "Workflow completado exitosamente."
+      
+            if (!merged) {
+              console.log('No se pudo realizar el merge automático tras varios intentos.');
+            }
