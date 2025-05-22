@@ -1,4 +1,4 @@
-name: Auto PR de ms-documents-bs a ms-documents-bs-final
+name: Auto merge de PRs del bot hacia ms-documents-bs-final
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: auto-merge-bot
+  group: promote-environments-${{ github.head_ref }}
   cancel-in-progress: false
 
 jobs:
