@@ -1,0 +1,51 @@
+name: Auto merge PR del bot
+
+on:
+  workflow_dispatch:
+
+concurrency:
+  group: pr-auto-merge-secuencial
+  cancel-in-progress: false
+
+jobs:
+  auto-merge-bot:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Intentar fusionar el PR automáticamente
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              base: 'ms-documents-bs-final',
+              head: `${context.repo.owner}:upload-bot-aldo`,
+              per_page: 10
+            });
+
+            const botPrs = prs.data.filter(pr => pr.user.login === 'bot-aldo');
+            if (botPrs.length === 0) {
+              console.log('No hay PRs del bot para fusionar.');
+              return;
+            }
+
+            const pr = botPrs[0];
+            try {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: pr.number,
+                merge_method: 'squash'
+              });
+              console.log(`PR #${pr.number} fusionado automáticamente.`);
+            } catch (mergeError) {
+              console.error(`No se pudo fusionar el PR #${pr.number}:`, mergeError.message);
+            }

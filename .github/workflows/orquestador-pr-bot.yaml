@@ -1,0 +1,85 @@
+name: Orquestador de PRs del Bot y Promoción
+
+on:
+  workflow_dispatch:
+  schedule:
+    - cron: '* * * * *'  # Ejecutar cada minuto
+
+jobs:
+  orquestar:
+    runs-on: ubuntu-latest
+
+    concurrency:
+      group: orquestador-secuencial
+      cancel-in-progress: false
+
+    steps:
+      - name: Checkout del repositorio
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+
+      - name: Obtener PRs abiertos del bot hacia ms-documents-bs-final
+        id: obtener-pr
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const fs = require('fs');
+            const prs = await github.rest.pulls.list({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              state: 'open',
+              base: 'ms-documents-bs-final',
+              per_page: 20
+            });
+
+            const botPrs = prs.data.filter(
+              pr => pr.user.login === 'bot-aldo' && pr.head.ref.startsWith('upload-bot-aldo')
+            );
+
+            if (botPrs.length === 0) {
+              console.log('No hay PRs del bot pendientes.');
+              return;
+            }
+
+            const pr = botPrs[0];
+            fs.writeFileSync('pr_number.txt', pr.number.toString());
+            console.log(`PR encontrado: #${pr.number} - ${pr.title}`);
+
+      - name: Cargar output del PR
+        id: cargar-output
+        run: echo "pr_number=$(cat pr_number.txt)" >> $GITHUB_OUTPUT
+
+      - name: Validar mergeabilidad y fusionar PR
+        if: ${{ steps.cargar-output.outputs.pr_number != '' }}
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const prNumber = Number('${{ steps.cargar-output.outputs.pr_number }}');
+
+            const { data: pr } = await github.rest.pulls.get({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber
+            });
+
+            if (pr.mergeable && pr.mergeable_state === 'clean') {
+              await github.rest.pulls.merge({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                merge_method: 'squash'
+              });
+              console.log(`PR #${prNumber} fusionado correctamente.`);
+            } else {
+              console.log(`PR #${prNumber} no es mergeable en este momento. Estado: ${pr.mergeable_state}`);
+              process.exit(0);
+            }
+
+      - name: Ejecutar workflow de promoción a QA, STG y PROD
+        if: ${{ steps.cargar-output.outputs.pr_number != '' }}
+        run: gh workflow run promote-environments.yml
+        env:
+          GH_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
