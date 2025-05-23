@@ -1,8 +1,4 @@
-<<<<<<< HEAD:.github/workflows/auto-pr-to-final.yaml
-name: Auto merge de PRs del bot hacia ms-documents-bs-final
-=======
 name: Auto merge PR del bot
->>>>>>> origin/ms-documents-bs-final:.github/workflows/auto-merge-bot.yaml
 
 on:
   pull_request:
@@ -14,11 +10,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-<<<<<<< HEAD:.github/workflows/auto-pr-to-final.yaml
-  group: promote-environments-${{ github.head_ref }}
-=======
   group: pr-auto-merge-secuencial
->>>>>>> origin/ms-documents-bs-final:.github/workflows/auto-merge-bot.yaml
   cancel-in-progress: false
 
 jobs:
