@@ -1,20 +1,33 @@
-name: Crear PRs para ambientes QA, STG y PROD
+name: Promover cambios a ambientes
 
 on:
-  push:
-    branches:
-      - ms-documents-bs-final
+  workflow_run:
+    workflows: ["Auto merge PR del bot"]
+    types:
+      - completed
 
 concurrency:
-  group: promote-environments
+  group: promote-environments-secuencial
   cancel-in-progress: false
 
 jobs:
-  crear-prs-ambientes:
-    name: Crear PRs automáticos hacia QA, STG y PROD
+  cpromover:
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
+      - name: Verificar resultado del auto-merge
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+          script: |
+            const conclusion = context.payload.workflow_run.conclusion;
+            console.log(`Resultado del workflow previo (auto-merge): ${conclusion}`);
+            if (conclusion !== 'success') {
+              console.log('El auto-merge no fue exitoso. Abortando promoción.');
+              return;
+            }
+              
       # 1. Checkout del repositorio completo
       - name: Checkout repositorio
         uses: actions/checkout@v3
@@ -22,7 +35,7 @@ jobs:
           fetch-depth: 0
 
       # 2. Crear los PRs automáticos hacia cada ambiente
-      - name: Crear y fusionar PRs automáticos
+      - name: Crear y fusionar PRs a QA, STG y PROD
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
