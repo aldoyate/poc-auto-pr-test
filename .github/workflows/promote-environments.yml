@@ -1,14 +1,17 @@
-name: Promover cambios a ambientes
+name: Crear PRs para ambientes QA, STG y PROD
 
 on:
-  workflow_dispatch:
+  push:
+    branches:
+      - ms-documents-bs-final
 
 concurrency:
-  group: promote-environments-secuencial
+  group: promote-environments
   cancel-in-progress: false
 
 jobs:
-  cpromover:
+  crear-prs-ambientes:
+    name: Crear PRs automáticos hacia QA, STG y PROD
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +22,7 @@ jobs:
           fetch-depth: 0
 
       # 2. Crear los PRs automáticos hacia cada ambiente
-      - name: Crear y fusionar PRs a QA, STG y PROD
+      - name: Crear y fusionar PRs automáticos
         uses: actions/github-script@v6
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
@@ -64,4 +67,3 @@ jobs:
                 console.log(`Ya existe un PR abierto hacia ${env}.`);
               }
             }
-
