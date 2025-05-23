@@ -1,6 +1,12 @@
 name: Auto merge PR del bot
 
 on:
+  pull_request:
+    branches:
+      - ms-documents-bs-final
+    types:
+      - opened
+      - synchronize
   workflow_dispatch:
 
 concurrency:
@@ -9,6 +15,7 @@ concurrency:
 
 jobs:
   auto-merge-bot:
+    if: github.event.pull_request.user.login == 'bot-aldo'
     runs-on: ubuntu-latest
 
     steps:
@@ -22,30 +29,16 @@ jobs:
         with:
           github-token: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
           script: |
-            const prs = await github.rest.pulls.list({
-              owner: context.repo.owner,
-              repo: context.repo.repo,
-              state: 'open',
-              base: 'ms-documents-bs-final',
-              head: `${context.repo.owner}:upload-bot-aldo`,
-              per_page: 10
-            });
-
-            const botPrs = prs.data.filter(pr => pr.user.login === 'bot-aldo');
-            if (botPrs.length === 0) {
-              console.log('No hay PRs del bot para fusionar.');
-              return;
-            }
-
-            const pr = botPrs[0];
+            const prNumber = context.payload.pull_request.number;
+            console.log(`Intentando fusionar PR #${prNumber} creado por el bot...`);
             try {
               await github.rest.pulls.merge({
                 owner: context.repo.owner,
                 repo: context.repo.repo,
-                pull_number: pr.number,
+                pull_number: prNumber,
                 merge_method: 'squash'
               });
-              console.log(`PR #${pr.number} fusionado automáticamente.`);
+              console.log(`PR #${prNumber} fusionado automáticamente.`);
             } catch (mergeError) {
-              console.error(`No se pudo fusionar el PR #${pr.number}:`, mergeError.message);
+              console.error(`No se pudo fusionar el PR #${prNumber}:`, mergeError.message);
             }

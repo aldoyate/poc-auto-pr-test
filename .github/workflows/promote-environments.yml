@@ -64,3 +64,4 @@ jobs:
                 console.log(`Ya existe un PR abierto hacia ${env}.`);
               }
             }
+
