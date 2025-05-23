@@ -1,10 +1,9 @@
 name: Promover cambios a ambientes
 
 on:
-  workflow_run:
-    workflows: ["Auto merge PR del bot"]
-    types:
-      - completed
+  push:
+    branches:
+      - ms-documents-bs-final
 
 concurrency:
   group: promote-environments-secuencial
