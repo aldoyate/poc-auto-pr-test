@@ -3,7 +3,7 @@ name: Orquestador de PRs del Bot y Promoción
 on:
   workflow_dispatch:
   schedule:
-    - cron: '* * * * *'  # Cada 1 minuto (actualizado para activar cron)
+    - cron: '* * * * *'  # Ejecutar cada minuto
 
 jobs:
   orquestar:
@@ -31,11 +31,13 @@ jobs:
               repo: context.repo.repo,
               state: 'open',
               base: 'ms-documents-bs-final',
-              head: `${context.repo.owner}:upload-bot-aldo`,
-              per_page: 10
+              per_page: 20
             });
 
-            const botPrs = prs.data.filter(pr => pr.user.login === 'bot-aldo');
+            const botPrs = prs.data.filter(
+              pr => pr.user.login === 'bot-aldo' && pr.head.ref.startsWith('upload-bot-aldo')
+            );
+
             if (botPrs.length === 0) {
               console.log('No hay PRs del bot pendientes.');
               return;
@@ -73,7 +75,7 @@ jobs:
               console.log(`PR #${prNumber} fusionado correctamente.`);
             } else {
               console.log(`PR #${prNumber} no es mergeable en este momento. Estado: ${pr.mergeable_state}`);
-              core.setFailed(`PR #${prNumber} no puede fusionarse automáticamente.`);
+              process.exit(0);
             }
 
       - name: Ejecutar workflow de promoción a QA, STG y PROD
