@@ -1,4 +1,4 @@
-name: Crear PRs para ambientes QA, STG y PROD
+name: Promover cambios a ambientes
 
 on:
   push:
