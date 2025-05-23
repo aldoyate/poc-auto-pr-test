@@ -1,3 +1,6 @@
+# Este workflow está deshabilitado para ejecución automática.
+# Usar desde la pestaña "Actions" solo si se requiere validación manual.
+
 name: Auto PR de ms-documents-bs a ms-documents-bs-final
 
 on:
