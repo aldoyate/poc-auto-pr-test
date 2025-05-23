@@ -12,6 +12,15 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+      # Paso agregado: Verificar que la rama activa sea 'ms-documents-bs-final'
+      - name: Verificar rama activa
+        run: |
+          echo "Rama activa: $GITHUB_REF"
+          if [[ "$GITHUB_REF" != "refs/heads/ms-documents-bs-final" ]]; then
+            echo "Este workflow solo se debe ejecutar desde la rama 'ms-documents-bs-final'. Abortando."
+            exit 1
+          fi
+
       # 1. Checkout del repositorio completo
       - name: Checkout repositorio
         uses: actions/checkout@v3
