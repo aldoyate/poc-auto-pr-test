@@ -3,7 +3,7 @@ name: Orquestador de PRs del Bot y Promoción
 on:
   workflow_dispatch:
   schedule:
-    - cron: '* * * * *'  # Cada 1 minuto
+    - cron: '* * * * *'  # Cada 1 minuto (actualizado para activar cron)
 
 jobs:
   orquestar:
