@@ -1,10 +1,7 @@
 name: Promover cambios a ambientes
 
 on:
-  workflow_run:
-    workflows: ["Auto merge PR del bot"]
-    types:
-      - completed
+  workflow_dispatch:
 
 concurrency:
   group: promote-environments-secuencial
@@ -12,7 +9,6 @@ concurrency:
 
 jobs:
   cpromover:
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-latest
 
     steps:
